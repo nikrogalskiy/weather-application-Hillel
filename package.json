@@ -1,0 +1,28 @@
+{
+	"name": "weather-application-hillel",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"express": "^4.17.1",
+		"mongodb": "^4.0.0"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.12"
+	},
+	"scripts": {
+		"start": "node index",
+		"dev": "nodemon index"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nikrogalskiy/weather-application-Hillel.git"
+	},
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/nikrogalskiy/weather-application-Hillel/issues"
+	},
+	"homepage": "https://github.com/nikrogalskiy/weather-application-Hillel#readme"
+}
