@@ -1,7 +1,28 @@
 const express = require('express');
 const path = require('path');
+const { v4 } = require('uuid');
 const PORT = process.env.PORT || 3000;
 let app = express();
+let CITIES = [];
+app.use(express.json());
+
+// app.post('/api/cities', (req, res) => {
+// 	const city = { ...req.body, id: v4() };
+// 	CITIES.push(city);
+// 	res.status(201).json(city);
+// });
+
+app.post('/api/cities', (req, res) => {
+	const city = { ...req.body, id: v4() };
+	if (city.cod < 400) {
+		CITIES.push(city);
+	}
+	res.status(201).json(city);
+});
+
+app.get('/api/cities', (req, res) => {
+	res.status(200).json(CITIES);
+});
 
 app.use(express.static(path.resolve(__dirname, 'client')));
 

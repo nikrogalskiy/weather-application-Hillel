@@ -106,8 +106,10 @@ body {
 .weather__info {
 	background: #ff7f50;
 	border-radius: 15px;
-	padding: 20px 15px;
 	margin: 0px 0px 30px 0px;
+}
+.info-weather__wrapper {
+	padding: 20px 15px;
 }
 .info-weather_body {
 	display: flex;
@@ -148,34 +150,40 @@ body {
 }
 .info-weather__btn {
 	order: 4;
+	display: flex;
+	flex-direction: column;
 }
 .info-weather__btn button {
 	justify-content: center;
 	align-items: center;
 	padding: 0px 10px;
-	height: 30px;
-	font-size: 14px;
+	height: 25px;
+	font-size: 12px;
 	background: #d63f3a;
-	margin: 0px 0px 10px 0px;
+	margin: 0px 0px 7px 0px;
 	transition: background 0.3s ease 0s;
 	border-radius: 7px;
 }
 .cities__list {
 	display: flex;
+	flex-wrap: wrap;
 	margin: 0px -10px;
-	align-items: center;
 }
 
-.cities__list li {
+.cities__item {
 	flex: 0 1 25%;
 	padding: 0px 10px;
+	min-height: 100%;
+	margin: 0px 0px 20px 0px;
 }
 .cities__current {
 	flex: 0 0 180px;
 }
 .link {
+	display: flex;
+	flex-direction: column;
 	width: 100%;
-	display: inline-block;
+	height: 100%;
 	background: #c6c367;
 	padding: 10px;
 	color: black;
@@ -216,6 +224,7 @@ body {
 	text-align: center;
 	margin: 0px 0px 15px 0px;
 	font-size: 20px;
+	flex: 1 1 auto;
 }
 .current-city {
 	display: block;
@@ -229,14 +238,13 @@ body {
 		flex-wrap: wrap;
 	}
 
-	.cities__list li {
+	.cities__item {
 		flex: 0 1 33.333%;
-		margin: 0px 0px 20px 0px;
 	}
 }
 
 @media (max-width: 584px) {
-	.cities__list li {
+	.cities__item {
 		flex: 0 1 50%;
 	}
 }
@@ -254,6 +262,7 @@ body {
 		flex-wrap: wrap;
 		justify-content: space-between;
 		width: 100%;
+		margin: 20px 0px 0px 0px;
 	}
 	.info-weather__description {
 		margin: 0px 10px 10px 0px;
@@ -265,6 +274,7 @@ body {
 		margin: 0px 10px 10px 0px;
 	}
 }
+
 @media (max-width: 375px) {
 	.weather__input {
 		flex-wrap: wrap;
