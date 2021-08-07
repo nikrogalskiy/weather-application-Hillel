@@ -38,6 +38,11 @@ class View {
 					<div class="info-weather__city">${obj[0].name},</div>
 					<div class="info-weather country">${obj[0].sys.country}</div>
 				</div>
+				<div class="weather__input_edit">
+					<input type="text" name="newCity" class="input-edit" placeholder="Введите название города...">
+					<button class="btn-edit">Сохранить</button>
+					<button class="btn-cancel">Отмена</button>
+				</div>
 				<div class="info-weather_body">
 						<div class="info-weather__icon"><img src="https://openweathermap.org/img/wn/${obj[0].weather[0].icon}.png" alt=""></div>
 						<div class="info-weather__temp">${obj[0].main.temp}<span> C&deg</span></div>
@@ -52,11 +57,11 @@ class View {
 		this.widgetDetailed = detailedWeatherInformation;
 	}
 
-	createButtons() {
+	createButtons(id) {
 		let btn = `
 			<div class="info-weather__btn">
-				<button>Удалить</button>
-				<button>Изменить</button>
+				<button data-id="${id}" class="edit">Изменить</button>
+				<button data-id="${id}" class="delete">Удалить</button>
 			</div>`;
 		this.buttons = btn;
 	}
@@ -71,10 +76,38 @@ class Model {
 			timeout: 5000,
 			maximumAge: 0
 		};
+		this.currentSity = [];
 		this.listSities = [];
+		this.idCity = 0;
 	}
 
+	eventHandlerDelete() {
+		let deleteBtn = document.querySelector(".delete");
+		let editBtn = document.querySelector(".edit");
+		let weatherInputEdit = document.querySelector(".weather__input_edit");
+		let btnCancel = document.querySelector(".btn-cancel");
+		let inputEdit = document.querySelector(".input-edit");
+		let btnEdit = document.querySelector(".btn-edit");
 
+		deleteBtn.addEventListener("click", (e) => {
+			let id = e.target.getAttribute("data-id");
+			this.deleteCity(id);
+		});
+
+		editBtn.addEventListener("click", (e) => {
+			this.idCity = e.target.getAttribute("data-id");
+			weatherInputEdit.classList.add("_active");
+		});
+		btnCancel.addEventListener("click", (e) => {
+			weatherInputEdit.classList.remove("_active");
+		});
+		btnEdit.addEventListener("click", (e) => {
+			let cityName = inputEdit.value;
+			inputEdit.value = "";
+			weatherInputEdit.classList.remove("_active");
+			this.editCity(cityName, this.idCity);
+		});
+	}
 
 	getCityName() {
 		let cityName = this.view.input.value;
@@ -82,10 +115,10 @@ class Model {
 		return cityName;
 	}
 
-	showWidgetDetailed(obj) {
-		this.view.createDetailedWeatherInformation(obj)
+	showWidgetDetailed(obj, id) {
+		this.view.createDetailedWeatherInformation(obj);
 		this.view.weatherInfo.innerHTML = this.view.widgetDetailed;
-		this.view.createButtons();
+		this.view.createButtons(id);
 	}
 
 	showButtons() {
@@ -116,7 +149,6 @@ class Model {
 				this.getShowWeaterCurrentCity();
 			});
 		});
-
 		await citiesItemR.forEach(i => {
 			i.addEventListener("click", (e) => {
 				e.preventDefault();
@@ -126,18 +158,40 @@ class Model {
 					item.remove();
 				}
 				let newListSities = this.listSities.filter(i => i.id === id);
-				this.showWidgetDetailed(newListSities);
+				this.showWidgetDetailed(newListSities, i.id);
 				this.showButtons();
+				this.eventHandlerDelete();
 			});
-
 		});
 	}
 
 	objCurrentSity(obj, cityName) {
 		let newObj = obj.filter(item => item.name.toLowerCase() === cityName.toLowerCase());
 		return newObj;
-	};
+	}
 
+	async deleteCity(id) {
+		await this.request(`/api/cities/${id}`, "DELETE");
+		let data = await document.querySelectorAll(".info-weather__wrapper");
+		let itemCurent = await document.querySelectorAll(".cities__item_c");
+		let itemRest = await document.querySelectorAll(".cities__item_r");
+		let removeData = await this.removeItem(data);
+		let removeItemCurent = await this.removeItem(itemCurent);
+		let removeItemRest = await this.removeItem(itemRest);
+		await this.getShowWeaterCurrentCity();
+	}
+
+	async editCity(cityName, id) {
+		let weatherInformation = await this.request(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&lang=ru&appid=35859dc542ddefeb9aba8b07fdb7e774`);
+		await this.request(`/api/cities/${id}`, "PUT", weatherInformation);
+		let data = await document.querySelectorAll(".info-weather__wrapper");
+		let itemCurent = await document.querySelectorAll(".cities__item_c");
+		let itemRest = await document.querySelectorAll(".cities__item_r");
+		let removeData = await this.removeItem(data);
+		let removeItemCurent = await this.removeItem(itemCurent);
+		let removeItemRest = await this.removeItem(itemRest);
+		await this.getShowWeaterCurrentCity();
+	}
 
 	getShowWeaterCurrentCity() {
 		let success = async (pos) => {
@@ -145,6 +199,7 @@ class Model {
 			let longitude = pos.coords.longitude;
 			let weatherInfo = await this.request(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&lang=ru&appid=35859dc542ddefeb9aba8b07fdb7e774`);
 			let currentSity = await [{ ...weatherInfo }];
+			this.currentSity = await currentSity;
 			let creaShowteWidget = await this.view.creaShowteWidget(currentSity, this.view.titleYourTown, this.view.citiesList);
 			let showWidgetDetailed = await this.showWidgetDetailed(currentSity);
 			let objListSities = await this.getListCities();
@@ -168,18 +223,22 @@ class Model {
 		let removeItem = await this.removeItem(items);
 		let creaShowteWidget = await this.view.creaShowteWidget(this.listSities, this.view.titleWeatherIn, this.view.citiesList, this.view.citiesItemR);
 		let objCurrentSity = await this.objCurrentSity(this.listSities, cityName);
-		let showWidgetDetailed = await this.showWidgetDetailed(objCurrentSity);
+		let idObjCurrentSity = await objCurrentSity[0].id;
+		let showWidgetDetailed = await this.showWidgetDetailed(objCurrentSity, idObjCurrentSity);
 		let showinfoSelectedItem = await this.showinfoSelectedItem();
 		let showButtons = await this.showButtons();
+		let eventHandlerDelete = await this.eventHandlerDelete();
 	}
 
 	async ifDataBan() {
 		let objListSities = await this.getListCities();
 		let items = await document.querySelectorAll(".cities__item_r");
 		let removeItem = await this.removeItem(items);
-		let showWidgetDetailed = await this.showWidgetDetailed(this.listSities);
+		let IdObjListSities = this.listSities[0].id;
+		let showWidgetDetailed = await this.showWidgetDetailed(this.listSities, IdObjListSities);
 		let showButtons = await this.showButtons();
 		let creaShowteWidget = await this.view.creaShowteWidget(this.listSities, this.view.titleWeatherIn, this.view.citiesList, this.view.citiesItemR);
+		let eventHandlerDelete = await this.eventHandlerDelete();
 	}
 
 	async request(url, method = 'GET', data = null) {
@@ -215,6 +274,7 @@ class Controller {
 			this.model.getWeather();
 		});
 	}
+
 }
 
 function start() {

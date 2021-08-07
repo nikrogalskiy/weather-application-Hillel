@@ -6,12 +6,6 @@ let app = express();
 let CITIES = [];
 app.use(express.json());
 
-// app.post('/api/cities', (req, res) => {
-// 	const city = { ...req.body, id: v4() };
-// 	CITIES.push(city);
-// 	res.status(201).json(city);
-// });
-
 app.post('/api/cities', (req, res) => {
 	const city = { ...req.body, id: v4() };
 	if (city.cod < 400) {
@@ -22,6 +16,20 @@ app.post('/api/cities', (req, res) => {
 
 app.get('/api/cities', (req, res) => {
 	res.status(200).json(CITIES);
+});
+
+app.delete('/api/cities/:id', (req, res) => {
+	CITIES = CITIES.filter(item => item.id !== req.params.id);
+	res.status(200).json({ message: 'Контакт был удален' });
+});
+
+app.put('/api/cities/:id', (req, res) => {
+	const idx = CITIES.findIndex(item => item.id === req.params.id);
+	CITIES[idx] = { ...req.body, id: v4() };
+	// if (idx.cod < 400) {
+	// 	CITIES[idx] = { ...req.body, id: v4() };
+	// }
+	res.json(CITIES[idx]);
 });
 
 app.use(express.static(path.resolve(__dirname, 'client')));
